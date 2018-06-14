@@ -6,6 +6,7 @@ import time
 
 parser = argparse.ArgumentParser('PGGAN')
 
+
 ## general settings.
 parser.add_argument('--train_data_root', type=str, default='/raid/datasets/img_align_celeba')
 parser.add_argument('--random_seed', type=int, default=int(time.time()))
