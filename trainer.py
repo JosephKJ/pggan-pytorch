@@ -341,5 +341,3 @@ print '-------------------------------------------------'
 torch.backends.cudnn.benchmark = True           # boost speed.
 trainer = trainer(config)
 trainer.train()
-
-

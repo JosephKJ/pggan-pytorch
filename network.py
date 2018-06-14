@@ -1,10 +1,5 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
-from torch.autograd import Variable
 from custom_layers import *
-import copy
+import torch.nn as nn
 
 
 # defined for code simplicity.
@@ -18,6 +13,7 @@ def deconv(layers, c_in, c_out, k_size, stride=1, pad=0, leaky=True, bn=False, w
         if pixel:   layers.append(pixelwise_norm_layer())
     return layers
 
+
 def conv(layers, c_in, c_out, k_size, stride=1, pad=0, leaky=True, bn=False, wn=False, pixel=False, gdrop=True, only=False):
     if gdrop:       layers.append(generalized_drop_out(mode='prop', strength=0.0))
     if wn:          layers.append(equalized_conv2d(c_in, c_out, k_size, stride, pad, initializer='kaiming'))
@@ -29,14 +25,15 @@ def conv(layers, c_in, c_out, k_size, stride=1, pad=0, leaky=True, bn=False, wn=
         if pixel:   layers.append(pixelwise_norm_layer())
     return layers
 
+
 def linear(layers, c_in, c_out, sig=True, wn=False):
     layers.append(Flatten())
     if wn:      layers.append(equalized_linear(c_in, c_out))
-    else:       layers.append(Linear(c_in, c_out))
+    else:       layers.append(nn.Linear(c_in, c_out))
     if sig:     layers.append(nn.Sigmoid())
     return layers
 
-    
+
 def deepcopy_module(module, target):
     new_module = nn.Sequential()
     for name, m in module.named_children():
@@ -45,12 +42,14 @@ def deepcopy_module(module, target):
             new_module[-1].load_state_dict(m.state_dict())         # copy weights
     return new_module
 
+
 def soft_copy_param(target_link, source_link, tau):
     ''' soft-copy parameters of a link to another link. '''
     target_params = dict(target_link.named_parameters())
     for param_name, param in source_link.named_parameters():
         target_params[param_name].data = target_params[param_name].data.mul(1.0-tau)
         target_params[param_name].data = target_params[param_name].data.add(param.data.mul(tau))
+
 
 def get_module_names(model):
     names = []
@@ -186,8 +185,6 @@ class Generator(nn.Module):
         return x
 
 
-        
-
 class Discriminator(nn.Module):
     def __init__(self, config):
         super(Discriminator, self).__init__()
@@ -311,9 +308,6 @@ class Discriminator(nn.Module):
     def forward(self, x):
         x = self.model(x)
         return x
-
- 
-
 
 
 

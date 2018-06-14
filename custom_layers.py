@@ -1,16 +1,10 @@
+import numpy as np
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import numpy as np
 from torch.autograd import Variable
-import torch 
-import torch.nn as nn
-import torchvision.datasets as dsets
-import torchvision.transforms as transforms
-from torch.autograd import Variable
-from PIL import Image
 import copy
-from torch.nn.init import kaiming_normal, calculate_gain
+from torch.nn.init import kaiming_normal, calculate_gain, xavier_normal
+
 
 # same function as ConcatTable container in Torch7.
 class ConcatTable(nn.Module):
@@ -23,13 +17,13 @@ class ConcatTable(nn.Module):
         y = [self.layer1(x), self.layer2(x)]
         return y
 
+
 class Flatten(nn.Module):
     def __init__(self):
         super(Flatten, self).__init__()
 
     def forward(self, x):
         return x.view(x.size(0), -1)
-
 
 
 class fadein_layer(nn.Module):
@@ -45,6 +39,13 @@ class fadein_layer(nn.Module):
     def forward(self, x):
         return torch.add(x[0].mul(1.0-self.alpha), x[1].mul(self.alpha))
 
+
+def mean(tensor, axis, **kwargs):
+    if isinstance(axis, int):
+        axis = [axis]
+    for ax in axis:
+        tensor = torch.mean(tensor, axis=ax, **kwargs)
+    return tensor
 
 
 # https://github.com/github-pengge/PyTorch-progressive_growing_of_gans/blob/master/models/base_model.py
@@ -182,6 +183,3 @@ class generalized_drop_out(nn.Module):
     def __repr__(self):
         param_str = '(mode = %s, strength = %s, axes = %s, normalize = %s)' % (self.mode, self.strength, self.axes, self.normalize)
         return self.__class__.__name__ + param_str
-
-
-
