@@ -2,7 +2,7 @@ import dataloader as DL
 from config import config
 import network as net
 from math import floor, ceil
-import os, sys
+import os
 import torch
 import torchvision.transforms as transforms
 from torch.autograd import Variable
@@ -76,7 +76,6 @@ class trainer:
         self.use_tb = config.use_tb
         if self.use_tb:
             self.tb = tensorboard.tf_recorder()
-        
 
     def resl_scheduler(self):
         '''
@@ -159,8 +158,6 @@ class trainer:
             if floor(self.resl) >= self.max_resl and self.resl%1.0 >= (self.stab_tick + self.trns_tick*2)*delta:
                 self.phase = 'final'
                 self.resl = self.max_resl + (self.stab_tick + self.trns_tick*2)*delta
-
-
             
     def renew_everything(self):
         # renew dataloader.
@@ -200,7 +197,6 @@ class trainer:
         if self.optimizer == 'adam':
             self.opt_g = Adam(filter(lambda p: p.requires_grad, self.G.parameters()), lr=self.lr, betas=betas, weight_decay=0.0)
             self.opt_d = Adam(filter(lambda p: p.requires_grad, self.D.parameters()), lr=self.lr, betas=betas, weight_decay=0.0)
-        
 
     def feed_interpolated_input(self, x):
         if self.phase == 'gtrns' and floor(self.resl)>2 and floor(self.resl)<=self.max_resl:
@@ -220,8 +216,6 @@ class trainer:
         else:
             return x
 
-
-
     def add_noise(self, x):
         # TODO: support more method of adding noise.
         if self.flag_add_noise==False:
@@ -235,7 +229,6 @@ class trainer:
         z = np.random.randn(*x.size()).astype(np.float32) * strength
         z = Variable(torch.from_numpy(z)).cuda() if self.use_cuda else Variable(torch.from_numpy(z))
         return x + z
-
 
     def train(self):
         # noise for test.
@@ -308,7 +301,6 @@ class trainer:
                     self.tb.add_image_grid('grid/x_tilde', 4, utils.adjust_dyn_range(self.x_tilde.data.float(), [-1,1], [0,1]), self.globalIter)
                     self.tb.add_image_grid('grid/x_intp', 4, utils.adjust_dyn_range(self.x.data.float(), [-1,1], [0,1]), self.globalIter)
 
-
     def get_state(self, target):
         if target == 'gen':
             state = {
@@ -324,7 +316,6 @@ class trainer:
                 'optimizer' : self.opt_d.state_dict(),
             }
             return state
-
 
     def snapshot(self, path):
         if not os.path.exists(path):

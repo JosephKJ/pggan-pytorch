@@ -1,4 +1,5 @@
-""" config.py
+"""
+    config.py
 """
 import argparse
 import time
@@ -9,10 +10,6 @@ parser = argparse.ArgumentParser('PGGAN')
 parser.add_argument('--train_data_root', type=str, default='/home1/irteam/nashory/data/CelebA/Img')
 parser.add_argument('--random_seed', type=int, default=int(time.time()))
 parser.add_argument('--n_gpu', type=int, default=1)             # for Multi-GPU training.
-
-
-
-
 
 
 ## training parameters.
@@ -40,9 +37,7 @@ parser.add_argument('--flag_tanh', type=bool, default=False)        # use of tan
 parser.add_argument('--flag_sigmoid', type=bool, default=False)     # use of sigmoid at the end of the discriminator.
 parser.add_argument('--flag_add_noise', type=bool, default=True)    # add noise to the real image(x)
 parser.add_argument('--flag_norm_latent', type=bool, default=False) # pixelwise normalization of latent vector (z)
-parser.add_argument('--flag_add_drift', type=bool, default=True)   # add drift loss
-
-
+parser.add_argument('--flag_add_drift', type=bool, default=True)    # add drift loss
 
 
 ## optimizer setting.

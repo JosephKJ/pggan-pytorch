@@ -1,15 +1,6 @@
-import os
-import torch
-import numpy as np
-from io import BytesIO
-import scipy.misc
-#import tensorflow as tf
-import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from torchvision.datasets import ImageFolder
-from torch.autograd import Variable
-from matplotlib import pyplot as plt
 from PIL import Image
 
 
@@ -49,19 +40,6 @@ class dataloader:
     def __len__(self):
         return len(self.dataloader.dataset)
 
-       
     def get_batch(self):
         dataIter = iter(self.dataloader)
         return next(dataIter)[0].mul(2).add(-1)         # pixel range [-1, 1]
-
-
-        
-
-
-
-
-
-
-
-
-
