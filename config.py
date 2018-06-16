@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser('PGGAN')
 ## general settings.
 parser.add_argument('--train_data_root', type=str, default='/raid/datasets/CUB/CUB_200_2011/images')
 parser.add_argument('--random_seed', type=int, default=int(time.time()))
-parser.add_argument('--n_gpu', type=int, default=4)             # for Multi-GPU training.
+parser.add_argument('--n_gpu', type=int, default=5)             # for Multi-GPU training.
 
 
 ## training parameters.
