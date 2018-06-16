@@ -26,7 +26,9 @@ class trainer:
         self.nz = config.nz
         self.optimizer = config.optimizer
 
-        self.resl = 2           # we start from 2^2 = 4
+        self.start_growing_from = 5                 # we start from 2^5 = 32
+        self.initial_res = int(pow(2,start_growing_from))
+        self.resl = self.start_growing_from
         self.lr = config.lr
         self.eps_drift = config.eps_drift
         self.smoothing = config.smoothing
@@ -86,7 +88,7 @@ class trainer:
         step 3. (trns_tick) --> transition in discriminator.
         step 4. (stab_tick) --> stabilize.
         '''
-        if floor(self.resl) != 2 :
+        if floor(self.resl) != self.start_growing_from :
             self.trns_tick = self.config.trns_tick
             self.stab_tick = self.config.stab_tick
         
@@ -117,10 +119,10 @@ class trainer:
             # increase linearly every tick, and grow network structure.
             prev_resl = floor(self.resl)
             self.resl = self.resl + delta
-            self.resl = max(2, min(10.5, self.resl))        # clamping, range: 4 ~ 1024
+            self.resl = max(self.start_growing_from, min(10.5, self.resl))        # clamping, range: 4 ~ 1024
 
             # flush network.
-            if self.flag_flush_gen and self.resl%1.0 >= (self.trns_tick+self.stab_tick)*delta and prev_resl!=2:
+            if self.flag_flush_gen and self.resl%1.0 >= (self.trns_tick+self.stab_tick)*delta and prev_resl!=self.start_growing_from:
                 if self.fadein['gen'] is not None:
                     self.fadein['gen'].update_alpha(d_alpha)
                     self.complete['gen'] = self.fadein['gen'].alpha*100
@@ -131,7 +133,7 @@ class trainer:
                 self.fadein['gen'] = None
                 self.complete['gen'] = 0.0
                 self.phase = 'dtrns'
-            elif self.flag_flush_dis and floor(self.resl) != prev_resl and prev_resl!=2:
+            elif self.flag_flush_dis and floor(self.resl) != prev_resl and prev_resl!=self.start_growing_from:
                 if self.fadein['dis'] is not None:
                     self.fadein['dis'].update_alpha(d_alpha)
                     self.complete['dis'] = self.fadein['dis'].alpha*100
@@ -165,7 +167,7 @@ class trainer:
         self.loader.renew(min(floor(self.resl), self.max_resl))
         
         # define tensors
-        self.z = torch.FloatTensor(self.loader.batchsize, self.nz)
+        self.z = torch.FloatTensor(self.loader.batchsize, self.initial_res, self.initial_res)
         self.x = torch.FloatTensor(self.loader.batchsize, 3, self.loader.imsize, self.loader.imsize)
         self.x_tilde = torch.FloatTensor(self.loader.batchsize, 3, self.loader.imsize, self.loader.imsize)
         self.real_label = torch.FloatTensor(self.loader.batchsize).fill_(1)
@@ -199,7 +201,7 @@ class trainer:
             self.opt_d = Adam(filter(lambda p: p.requires_grad, self.D.parameters()), lr=self.lr, betas=betas, weight_decay=0.0)
 
     def feed_interpolated_input(self, x):
-        if self.phase == 'gtrns' and floor(self.resl)>2 and floor(self.resl)<=self.max_resl:
+        if self.phase == 'gtrns' and floor(self.resl)>self.start_growing_from and floor(self.resl)<=self.max_resl:
             alpha = self.complete['gen']/100.0
             transform = transforms.Compose( [   transforms.ToPILImage(),
                                                 transforms.Scale(size=int(pow(2,floor(self.resl)-1)), interpolation=0),      # 0: nearest
@@ -232,11 +234,11 @@ class trainer:
 
     def train(self):
         # noise for test.
-        self.z_test = torch.FloatTensor(self.loader.batchsize, self.nz)
+        self.z_test = torch.FloatTensor(self.loader.batchsize, self.initial_res, self.initial_res)
         if self.use_cuda:
             self.z_test = self.z_test.cuda()
         self.z_test = Variable(self.z_test, volatile=True)
-        self.z_test.data.resize_(self.loader.batchsize, self.nz).normal_(0.0, 1.0)
+        self.z_test.data.resize_(self.loader.batchsize, 1, self.initial_res, self.initial_res).normal_(0.0, 1.0)
         
         
         for step in range(2, self.max_resl+1+5):
@@ -258,7 +260,7 @@ class trainer:
                 self.x.data = self.feed_interpolated_input(self.loader.get_batch())
                 if self.flag_add_noise:
                     self.x = self.add_noise(self.x)
-                self.z.data.resize_(self.loader.batchsize, self.nz).normal_(0.0, 1.0)
+                self.z.data.resize_(self.loader.batchsize, 1, self.initial_res, self.initial_res).normal_(0.0, 1.0)
                 self.x_tilde = self.G(self.z)
                
                 self.fx = self.D(self.x)
