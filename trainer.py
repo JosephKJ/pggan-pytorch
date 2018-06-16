@@ -240,7 +240,7 @@ class trainer:
         
         
         for step in range(2, self.max_resl+1+5):
-            for iter in tqdm(range(0,(self.trns_tick*2+self.stab_tick*2)*self.TICK, self.loader.batchsize)):
+            for iter in tqdm(range(0, (self.trns_tick*2+self.stab_tick*2)*self.TICK, self.loader.batchsize)):
                 self.globalIter = self.globalIter+1
                 self.stack = self.stack + self.loader.batchsize
                 if self.stack > ceil(len(self.loader.dataset)):
@@ -340,4 +340,12 @@ for k, v in vars(config).items():
 print '-------------------------------------------------'
 torch.backends.cudnn.benchmark = True           # boost speed.
 trainer = trainer(config)
-trainer.train()
+
+try:
+    trainer.train()
+except IOError, e:
+    '''
+    To handle random : "IOError: [Errno 4] Interrupted system call"
+    '''
+    if e.errno != errno.EINTR:
+        raise

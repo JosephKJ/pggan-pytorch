@@ -3,6 +3,7 @@ import torch.nn as nn
 
 
 # defined for code simplicity.
+
 def deconv(layers, c_in, c_out, k_size, stride=1, pad=0, leaky=True, bn=False, wn=False, pixel=False, only=False):
     if wn:  layers.append(equalized_conv2d(c_in, c_out, k_size, stride, pad))
     else:   layers.append(nn.Conv2d(c_in, c_out, k_size, stride, pad))
@@ -39,7 +40,7 @@ def deepcopy_module(module, target):
     for name, m in module.named_children():
         if name == target:
             new_module.add_module(name, m)                          # make new structure and,
-            new_module[-1].load_state_dict(m.state_dict())         # copy weights
+            new_module[-1].load_state_dict(m.state_dict())          # copy weights
     return new_module
 
 
@@ -179,7 +180,6 @@ class Generator(nn.Module):
         for param in self.model.parameters():
             param.requires_grad = False
 
-    
     def forward(self, x):
         x = self.model(x.view(x.size(0), -1, 1, 1))
         return x
@@ -246,7 +246,6 @@ class Discriminator(nn.Module):
         model.add_module('last_block', last_block)
         self.module_names = get_module_names(model)
         return model
-    
 
     def grow_network(self, resl):
             
@@ -308,10 +307,3 @@ class Discriminator(nn.Module):
     def forward(self, x):
         x = self.model(x)
         return x
-
-
-
-
-
-
-
