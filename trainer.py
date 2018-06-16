@@ -27,7 +27,7 @@ class trainer:
         self.optimizer = config.optimizer
 
         self.start_growing_from = 5                 # we start from 2^5 = 32
-        self.initial_res = int(pow(2,start_growing_from))
+        self.initial_res = int(pow(2,self.start_growing_from))
         self.resl = self.start_growing_from
         self.lr = config.lr
         self.eps_drift = config.eps_drift

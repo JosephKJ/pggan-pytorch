@@ -181,8 +181,8 @@ class Generator(nn.Module):
         for param in self.model.parameters():
             param.requires_grad = False
 
-    def forward(self, x):
-        x = self.model(x.view(x.size(0), -1, 1, 1))
+    def forward(self, hidden_state):
+        x = self.model(hidden_state)
         return x
 
 
